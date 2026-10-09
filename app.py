@@ -9,7 +9,6 @@ st.set_page_config(
 )
 
 
-# 1. LOAD AND CLEAN DATA
 @st.cache_data
 def load_data():
     df = pd.read_csv("Atlantic_United_States.csv")
@@ -20,7 +19,6 @@ def load_data():
     ]
 
     missing = [col for col in required if col not in df.columns]
-
     if missing:
         raise ValueError(f"Missing columns: {missing}")
 
@@ -35,7 +33,6 @@ def load_data():
     df = df.drop_duplicates()
     df = df.dropna(subset=["date", "position"])
     df = df[df["position"].between(1, 50)].copy()
-
     df["duration_minutes"] = df["duration_ms"] / 60000
 
     return df
@@ -43,20 +40,14 @@ def load_data():
 
 df = load_data()
 
+st.title("United States Top 50 Playlist Analysis")
+st.write("Analysis of song popularity, chart rankings, artist performance, and playlist trends.")
 
-# 2. DASHBOARD TITLE
-st.title("🎵 United States Top 50 Playlist Analysis")
-st.write(
-    "Historical analysis of song rankings, popularity, "
-    "artist performance, and playlist trends."
-)
-
-
-# 3. FILTERS
+# Dashboard filters
 st.sidebar.header("Dashboard Filters")
 
 date_range = st.sidebar.date_input(
-    "Select Date Range",
+    "Date Range",
     value=(df["date"].min().date(), df["date"].max().date())
 )
 
@@ -68,12 +59,8 @@ if isinstance(date_range, (tuple, list)) and len(date_range) == 2:
         filtered["date"].dt.date.between(start_date, end_date)
     ]
 
-artist_options = sorted(filtered["artist"].unique())
-
-selected_artists = st.sidebar.multiselect(
-    "Select Artists",
-    artist_options
-)
+artists = sorted(filtered["artist"].unique())
+selected_artists = st.sidebar.multiselect("Artists", artists)
 
 if selected_artists:
     filtered = filtered[filtered["artist"].isin(selected_artists)]
@@ -90,43 +77,43 @@ filtered = filtered[
 ]
 
 if filtered.empty:
-    st.warning("No data available for the selected filters.")
+    st.warning("No records match the selected filters.")
     st.stop()
 
+# Key performance indicators
+st.subheader("Key Performance Indicators")
 
-# 4. KEY PERFORMANCE INDICATORS
-st.subheader("📌 Key Performance Indicators")
+c1, c2, c3, c4 = st.columns(4)
 
-col1, col2, col3, col4 = st.columns(4)
+c1.metric("Unique Songs", filtered["song"].nunique())
+c2.metric("Unique Artists", filtered["artist"].nunique())
 
-col1.metric("Unique Songs", filtered["song"].nunique())
-col2.metric("Unique Artists", filtered["artist"].nunique())
-col3.metric(
-    "Average Popularity",
-    f"{filtered['popularity'].mean():.2f}"
-    if filtered["popularity"].notna().any() else "N/A"
-)
-col4.metric("Average Rank", f"{filtered['position'].mean():.2f}")
+avg_pop = filtered["popularity"].mean()
+c3.metric("Average Popularity", f"{avg_pop:.2f}" if pd.notna(avg_pop) else "N/A")
 
-col1, col2, col3, col4 = st.columns(4)
+avg_rank = filtered["position"].mean()
+c4.metric("Average Rank", f"{avg_rank:.2f}" if pd.notna(avg_rank) else "N/A")
 
-col1.metric("Total Records", len(filtered))
-col2.metric("Dates Covered", filtered["date"].nunique())
-col3.metric(
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric("Total Records", len(filtered))
+c2.metric("Dates Covered", filtered["date"].nunique())
+
+avg_duration = filtered["duration_minutes"].mean()
+c3.metric(
     "Average Duration",
-    f"{filtered['duration_minutes'].mean():.2f} min"
-    if filtered["duration_minutes"].notna().any() else "N/A"
+    f"{avg_duration:.2f} min" if pd.notna(avg_duration) else "N/A"
 )
-col4.metric("Best Rank", int(filtered["position"].min()))
 
+c4.metric("Best Rank", int(filtered["position"].min()))
 
-# 5. SONG RANKING TRENDS
-st.subheader("📈 Song Ranking Trends")
+# Song ranking trends
+st.subheader("Song Ranking Trends")
 
 song_options = sorted(filtered["song"].unique())
 
 selected_songs = st.multiselect(
-    "Choose Songs to Compare",
+    "Choose Songs",
     song_options,
     default=song_options[:min(5, len(song_options))]
 )
@@ -144,13 +131,11 @@ if selected_songs:
         title="Song Position Over Time",
         markers=True
     )
-
     fig.update_yaxes(autorange="reversed")
     st.plotly_chart(fig, use_container_width=True)
 
-
-# 6. SONG PERFORMANCE
-st.subheader("🏆 Song Performance Analysis")
+# Song performance metrics
+st.subheader("Song Performance Analysis")
 
 song_metrics = filtered.groupby(["song", "artist"]).agg(
     days_on_chart=("date", "nunique"),
@@ -193,13 +178,11 @@ fig = px.scatter(
     hover_data=["song", "artist"],
     title="Chart Longevity vs Best Rank"
 )
-
 fig.update_yaxes(autorange="reversed")
 st.plotly_chart(fig, use_container_width=True)
 
-
-# 7. RANK VOLATILITY
-st.subheader("📊 Ranking Stability")
+# Ranking stability
+st.subheader("Ranking Stability")
 
 volatility = song_metrics.dropna(subset=["rank_volatility"])
 
@@ -210,14 +193,10 @@ if not volatility.empty:
         y="rank_volatility",
         title="Songs with Highest Rank Volatility"
     )
-
     st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Not enough ranking observations to calculate volatility.")
 
-
-# 8. ARTIST PERFORMANCE
-st.subheader("🎤 Artist Dominance")
+# Artist performance
+st.subheader("Artist Dominance")
 
 artist_metrics = filtered.groupby("artist").agg(
     unique_songs=("song", "nunique"),
@@ -241,13 +220,11 @@ fig = px.bar(
     y="appearances",
     title="Top 10 Artists by Playlist Appearances"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 st.dataframe(artist_metrics, use_container_width=True)
 
-
-# 9. POPULARITY VS RANK
-st.subheader("📉 Popularity vs Playlist Rank")
+# Popularity vs rank
+st.subheader("Popularity vs Playlist Rank")
 
 fig = px.scatter(
     filtered,
@@ -256,33 +233,33 @@ fig = px.scatter(
     hover_data=["song", "artist"],
     title="Popularity Compared with Playlist Position"
 )
-
 fig.update_yaxes(autorange="reversed")
 st.plotly_chart(fig, use_container_width=True)
 
-pearson = filtered["popularity"].corr(
-    filtered["position"], method="pearson"
-)
+# Calculate correlations without requiring SciPy
+correlation_data = filtered[["popularity", "position"]].dropna()
 
-spearman = filtered["popularity"].corr(
-    filtered["position"], method="spearman"
-)
+if len(correlation_data) >= 2:
+    pearson = correlation_data["popularity"].corr(
+        correlation_data["position"], method="pearson"
+    )
 
-col1, col2 = st.columns(2)
+    # Rank the values first, then calculate Pearson correlation
+    ranked_data = correlation_data.rank()
 
-col1.metric(
-    "Pearson Correlation",
-    f"{pearson:.3f}" if pd.notna(pearson) else "N/A"
-)
+    spearman = ranked_data["popularity"].corr(
+        ranked_data["position"], method="pearson"
+    )
+else:
+    pearson = float("nan")
+    spearman = float("nan")
 
-col2.metric(
-    "Spearman Correlation",
-    f"{spearman:.3f}" if pd.notna(spearman) else "N/A"
-)
+c1, c2 = st.columns(2)
+c1.metric("Pearson Correlation", f"{pearson:.3f}" if pd.notna(pearson) else "N/A")
+c2.metric("Spearman Correlation", f"{spearman:.3f}" if pd.notna(spearman) else "N/A")
 
-
-# 10. EXPLICIT CONTENT ANALYSIS
-st.subheader("🔞 Explicit vs Non-Explicit Songs")
+# Explicit content analysis
+st.subheader("Explicit vs Non-Explicit Songs")
 
 explicit_map = {
     "true": "Explicit",
@@ -318,12 +295,10 @@ fig = px.bar(
     y="average_popularity",
     title="Average Popularity by Content Type"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-
-# 11. ALBUM TYPE ANALYSIS
-st.subheader("💿 Single vs Album Performance")
+# Album type analysis
+st.subheader("Single vs Album Performance")
 
 album_metrics = filtered.groupby("album_type", dropna=False).agg(
     average_popularity=("popularity", "mean"),
@@ -339,12 +314,10 @@ fig = px.bar(
     y="average_popularity",
     title="Popularity by Album Type"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-
-# 12. SONG DURATION ANALYSIS
-st.subheader("⏱️ Song Duration vs Popularity")
+# Duration analysis
+st.subheader("Song Duration vs Popularity")
 
 fig = px.scatter(
     filtered,
@@ -353,12 +326,10 @@ fig = px.scatter(
     hover_data=["song", "artist"],
     title="Song Duration Compared with Popularity"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-
-# 13. ALBUM SIZE ANALYSIS
-st.subheader("💽 Album Size vs Popularity")
+# Album size analysis
+st.subheader("Album Size vs Popularity")
 
 fig = px.scatter(
     filtered,
@@ -367,12 +338,10 @@ fig = px.scatter(
     hover_data=["song", "artist"],
     title="Album Track Count vs Popularity"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-
-# 14. PLAYLIST ENTRIES AND EXITS
-st.subheader("🔄 Playlist Entries and Exits")
+# Playlist entries and exits
+st.subheader("Playlist Entries and Exits")
 
 daily_songs = (
     filtered.groupby("date")
@@ -389,7 +358,6 @@ for current_date, current_songs in daily_songs.items():
         "new_entries": len(current_songs - previous_songs),
         "exits": len(previous_songs - current_songs)
     })
-
     previous_songs = current_songs
 
 entry_exit = pd.DataFrame(records)
@@ -401,12 +369,10 @@ if not entry_exit.empty:
         y=["new_entries", "exits"],
         title="Daily Playlist Entries and Exits"
     )
-
     st.plotly_chart(fig, use_container_width=True)
 
-
-# 15. DOWNLOAD RESULTS
-st.subheader("📥 Download Analysis")
+# Download analysis
+st.subheader("Download Analysis")
 
 st.download_button(
     "Download Cleaned Dataset",
