@@ -135,6 +135,35 @@ st.markdown("""
 hr {
     border-color:#76529B !important;
 }
+
+/* FORCE DATE BOX PURPLE */
+[data-testid="stDateInput"] div[data-baseweb="input"],
+[data-testid="stDateInput"] div[data-baseweb="input"] > div,
+[data-testid="stDateInput"] div[data-baseweb="input"] div {
+    background: #493064 !important;
+    background-color: #493064 !important;
+    border-color: #B58AE8 !important;
+}
+
+/* DATE TEXT */
+[data-testid="stDateInput"] input {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    opacity: 1 !important;
+}
+
+/* CALENDAR BUTTON */
+[data-testid="stDateInput"] button {
+    background: #493064 !important;
+    color: #FFFFFF !important;
+}
+
+[data-testid="stDateInput"] svg {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
