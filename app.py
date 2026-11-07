@@ -1,10 +1,14 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+from pathlib import Path
 
-# ---------------------------------------------------------
+# ==========================================
 # PAGE CONFIGURATION
-# ---------------------------------------------------------
+# ==========================================
+
 st.set_page_config(
     page_title="US Top 50 | Music Analytics",
     page_icon="🎧",
@@ -12,157 +16,266 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------------------------------------------------------
-# PROFESSIONAL DARK THEME
-# ---------------------------------------------------------
+# ==========================================
+# SPOTIFY DARK THEME
+# ==========================================
+
 st.markdown("""
-
-/* ===== DARK THEME FIX ===== */
-
-.stApp,
-[data-testid="stAppViewContainer"] {
-    background: #101411 !important;
+<style>
+.stApp {
+    background-color: #101411 !important;
     color: #FFFFFF !important;
 }
 
 [data-testid="stHeader"] {
-    background: #101411 !important;
+    background-color: #101411 !important;
 }
 
 [data-testid="stSidebar"] {
-    background: #151B18 !important;
+    background-color: #151B18 !important;
 }
 
 [data-testid="stSidebar"] * {
     color: #FFFFFF !important;
 }
 
-/* Main page text */
-.stApp h1,
-.stApp h2,
-.stApp h3,
-.stApp p,
-.stApp label,
-.stApp span {
+.stApp h1, .stApp h2, .stApp h3,
+.stApp p, .stApp label, .stApp span {
     color: #F5F7F5;
 }
 
-/* Hero section */
 .hero {
-    background: linear-gradient(115deg, #1B3527, #10251B) !important;
+    background: linear-gradient(115deg, #1B3527, #10251B);
+    padding: 30px;
+    border-radius: 16px;
     border: 1px solid #2B6844;
+    margin-bottom: 25px;
 }
 
-/* KPI cards */
-.kpi-card {
-    background: #1B241F !important;
-    border: 1px solid #2B3B30;
-}
-
-/* Input fields */
-.stApp input,
-.stApp textarea,
-[data-baseweb="select"] > div {
-    background-color: #26332B !important;
+.hero h1 {
     color: #FFFFFF !important;
+    font-size: 34px;
+    margin-bottom: 8px;
 }
 
-/* Dropdown selected values */
-[data-baseweb="tag"] {
-    background-color: #1DB954 !important;
-    color: #07130B !important;
+.hero p {
+    color: #B8CBBF !important;
+    font-size: 15px;
 }
 
-[data-baseweb="tag"] * {
-    color: #07130B !important;
+.kpi-card {
+    background: #1B241F;
+    border: 1px solid #2B3B30;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    min-height: 115px;
 }
 
-/* Slider */
-[data-testid="stSlider"] {
+.kpi-card h4 {
+    color: #A9B9AE !important;
+    font-size: 14px;
+    margin: 0;
+}
+
+.kpi-card h2 {
+    color: #1DB954 !important;
+    font-size: 29px;
+    margin: 12px 0 0 0;
+}
+
+.section-title {
+    color: #1DB954 !important;
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+div[data-testid="stMetric"] {
+    background: #1B241F;
+    border: 1px solid #2B3B30;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+div[data-testid="stMetricLabel"] {
+    color: #A9B9AE !important;
+}
+
+div[data-testid="stMetricValue"] {
     color: #1DB954 !important;
 }
 
-/* Data tables */
+.stButton button {
+    background-color: #1DB954;
+    color: #07130B;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+}
+
+.stDownloadButton button {
+    background-color: #1DB954;
+    color: #07130B;
+    border: none;
+    font-weight: bold;
+}
+
+.stDownloadButton button:hover,
+.stButton button:hover {
+    background-color: #1ED760;
+    color: #07130B;
+}
+
+input, textarea {
+    background-color: #26332B !important;
+    color: white !important;
+}
+
+[data-baseweb="select"] > div {
+    background-color: #26332B !important;
+    color: white !important;
+}
+
 [data-testid="stDataFrame"] {
-    background: #1B241F !important;
-    color: #FFFFFF !important;
+    border: 1px solid #2B3B30;
+    border-radius: 10px;
 }
 
-/* Placeholder */
-input::placeholder {
-    color: #BFCBC2 !important;
-    opacity: 1 !important;
+hr {
+    border-color: #34443A;
 }
 
+</style>
 """, unsafe_allow_html=True)
 
-GREEN = "#1DB954"
-MINT = "#8FE3A8"
-PLOT_LAYOUT = dict(
-    template="plotly_dark",
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="DM Sans, sans-serif", color="#DCE6DE"),
-    margin=dict(l=20, r=20, t=55, b=20),
-    legend=dict(bgcolor="rgba(0,0,0,0)")
-)
 
-# ---------------------------------------------------------
-# LOAD AND PREPARE DATA
-# ---------------------------------------------------------
+# ==========================================
+# COLOR SETTINGS
+# ==========================================
+
+GREEN = "#1DB954"
+DARK = "#101411"
+GRID = "#29362E"
+
+def style_chart(fig, height=400):
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#F5F7F5", size=12),
+        height=height,
+        margin=dict(l=20, r=20, t=50, b=30),
+        legend=dict(
+            bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white")
+        ),
+        xaxis=dict(
+            gridcolor=GRID,
+            zerolinecolor=GRID
+        ),
+        yaxis=dict(
+            gridcolor=GRID,
+            zerolinecolor=GRID
+        )
+    )
+    return fig
+
+
+# ==========================================
+# LOAD DATASET
+# ==========================================
+
 @st.cache_data
 def load_data():
-    df = pd.read_csv("Atlantic_United_States.csv")
+    possible_paths = [
+        Path("Atlantic_United_States.csv"),
+        Path("data/Atlantic_United_States.csv")
+    ]
 
-    required = ["date", "position", "song", "artist"]
-    missing = [column for column in required if column not in df.columns]
-    if missing:
-        raise ValueError("Missing required dataset columns: " + ", ".join(missing))
+    for path in possible_paths:
+        if path.exists():
+            df = pd.read_csv(path)
+            return df
 
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
-
-    for col in ["position", "popularity", "duration_ms"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    df["song"] = df["song"].fillna("Unknown").astype(str)
-    df["artist"] = df["artist"].fillna("Unknown").astype(str)
-    df = df.drop_duplicates().dropna(subset=["date", "position"])
-    df = df[df["position"].between(1, 50)].copy()
-
-    if "popularity" not in df.columns:
-        df["popularity"] = pd.NA
-    if "duration_ms" not in df.columns:
-        df["duration_ms"] = pd.NA
-    if "duration_minutes" not in df.columns:
-        df["duration_minutes"] = df["duration_ms"] / 60000
-
-    return df
+    return None
 
 
-try:
-    df = load_data()
-except FileNotFoundError:
-    st.error("The dataset file 'Atlantic_United_States.csv' was not found. Keep it in the same folder as app.py.")
+df = load_data()
+
+if df is None:
+    st.error(
+        "Dataset not found! Please upload "
+        "Atlantic_United_States.csv to your project repository."
+    )
     st.stop()
-except Exception as error:
-    st.error(f"Unable to load the dataset: {error}")
+
+
+# ==========================================
+# DATA CLEANING
+# ==========================================
+
+df.columns = df.columns.str.strip().str.lower()
+
+required_columns = ["date", "position", "song", "artist"]
+
+missing_columns = [
+    col for col in required_columns if col not in df.columns
+]
+
+if missing_columns:
+    st.error(f"Missing required columns: {missing_columns}")
     st.stop()
+
+df["date"] = pd.to_datetime(df["date"], errors="coerce")
+df["position"] = pd.to_numeric(df["position"], errors="coerce")
+
+df["song"] = df["song"].fillna("Unknown Song").astype(str)
+df["artist"] = df["artist"].fillna("Unknown Artist").astype(str)
+
+df = df.dropna(subset=["date", "position"]).copy()
+
+optional_columns = [
+    "popularity",
+    "duration_ms",
+    "is_explicit",
+    "album_type"
+]
+
+for col in optional_columns:
+    if col not in df.columns:
+        df[col] = None
+
+df["popularity"] = pd.to_numeric(
+    df["popularity"], errors="coerce"
+)
+
+df["duration_ms"] = pd.to_numeric(
+    df["duration_ms"], errors="coerce"
+)
+
+df["duration_minutes"] = df["duration_ms"] / 60000
 
 if df.empty:
-    st.error("The dataset does not contain any valid chart records.")
+    st.error("No valid records found in the dataset.")
     st.stop()
 
 
-# ---------------------------------------------------------
-# SIDEBAR FILTERS
-# ---------------------------------------------------------
-st.sidebar.markdown("## 🎧 Music Analytics")
-st.sidebar.caption("US TOP 50 • INTERACTIVE DASHBOARD")
-st.sidebar.markdown("---")
-st.sidebar.markdown("### Filter your data")
+# ==========================================
+# SIDEBAR
+# ==========================================
 
-# Date filter
+st.sidebar.markdown("""
+# 🎧 Music Analytics
+
+**US TOP 50 • INTERACTIVE DASHBOARD**
+
+---
+""")
+
+st.sidebar.markdown("### 🎛️ Filter your data")
+
 min_date = df["date"].min().date()
 max_date = df["date"].max().date()
 
@@ -173,22 +286,29 @@ date_range = st.sidebar.date_input(
     max_value=max_date
 )
 
-# Artist filter
-available_artists = sorted(df["artist"].unique())
+if isinstance(date_range, (tuple, list)):
+    if len(date_range) == 2:
+        start_date, end_date = date_range
+    elif len(date_range) == 1:
+        start_date = end_date = date_range[0]
+    else:
+        start_date, end_date = min_date, max_date
+else:
+    start_date = end_date = date_range
+
+artists = sorted(df["artist"].unique().tolist())
 
 selected_artists = st.sidebar.multiselect(
     "🎤 Select artists",
-    options=available_artists,
+    artists,
     placeholder="Choose artists"
 )
 
-# Song search
-search_song = st.sidebar.text_input(
+song_search = st.sidebar.text_input(
     "🎵 Search song",
     placeholder="Enter song name..."
 )
 
-# Chart position filter
 position_range = st.sidebar.slider(
     "🏆 Chart position",
     min_value=1,
@@ -196,362 +316,531 @@ position_range = st.sidebar.slider(
     value=(1, 50)
 )
 
-# Popularity filter
-popularity_range = st.sidebar.slider(
-    "⭐ Popularity score",
-    min_value=0,
-    max_value=100,
-    value=(0, 100)
-)
+if df["popularity"].notna().any():
+    min_pop = int(df["popularity"].min())
+    max_pop = int(df["popularity"].max())
 
-# Apply filters
-data = df.copy()
+    popularity_range = st.sidebar.slider(
+        "⭐ Popularity score",
+        min_value=min_pop,
+        max_value=max_pop,
+        value=(min_pop, max_pop)
+    )
+else:
+    popularity_range = None
 
-if isinstance(date_range, (tuple, list)):
-    if len(date_range) == 2:
-        data = data[
-            data["date"].dt.date.between(
-                date_range[0], date_range[1]
-            )
-        ]
-elif date_range:
-    data = data[data["date"].dt.date == date_range]
+st.sidebar.markdown("---")
+st.sidebar.caption("🎧 US Top 50 Music Analytics")
+
+
+# ==========================================
+# APPLY FILTERS
+# ==========================================
+
+filtered_df = df[
+    (df["date"].dt.date >= start_date) &
+    (df["date"].dt.date <= end_date) &
+    (df["position"].between(
+        position_range[0], position_range[1]
+    ))
+].copy()
 
 if selected_artists:
-    data = data[data["artist"].isin(selected_artists)]
+    filtered_df = filtered_df[
+        filtered_df["artist"].isin(selected_artists)
+    ]
 
-if search_song.strip():
-    data = data[
-        data["song"].str.contains(
-            search_song.strip(),
+if song_search:
+    filtered_df = filtered_df[
+        filtered_df["song"].str.contains(
+            song_search,
             case=False,
             na=False
         )
     ]
 
-data = data[
-    data["position"].between(
-        position_range[0],
-        position_range[1]
-    )
-]
-
-if data["popularity"].notna().any():
-    data = data[
-        data["popularity"].between(
+if popularity_range is not None:
+    filtered_df = filtered_df[
+        filtered_df["popularity"].between(
             popularity_range[0],
             popularity_range[1]
         )
     ]
 
-st.sidebar.markdown("---")
-st.sidebar.success(f"Showing {len(data):,} records")
-st.sidebar.caption(f"Total dataset records: {len(df):,}")
+if filtered_df.empty:
+    st.warning("No records match your selected filters.")
+    st.info("Try changing your filters.")
+    st.stop()
 
-# ---------------------------------------------------------
-# HEADER
-# ---------------------------------------------------------
+
+# ==========================================
+# HERO SECTION
+# ==========================================
+
 st.markdown("""
 <div class="hero">
-    <div class="hero-kicker">Music • Trends • Insights</div>
-    <h1>US Top 50 Playlist Analytics</h1>
-    <p>Explore chart movements, discover leading artists, and understand what makes tracks popular.</p>
+    <h1>🎧 US TOP 50 | MUSIC ANALYTICS</h1>
+    <p>
+        Explore music trends, artist performance,
+        popularity scores and chart rankings.
+        Discover insights from the United States Top 50 playlist.
+    </p>
 </div>
 """, unsafe_allow_html=True)
 
-st.caption(
-    f"Showing data from **{data['date'].min():%d %b %Y}** to "
-    f"**{data['date'].max():%d %b %Y}**"
-)
 
-# ---------------------------------------------------------
-# KPI CARDS
-# ---------------------------------------------------------
-st.markdown('<div class="section-heading">Dashboard overview</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">A quick snapshot of the selected chart data</div>', unsafe_allow_html=True)
+# ==========================================
+# KPI METRICS
+# ==========================================
 
-avg_popularity = data["popularity"].mean()
-best_rank = data["position"].min()
+total_records = len(filtered_df)
+unique_songs = filtered_df["song"].nunique()
+unique_artists = filtered_df["artist"].nunique()
 
-kpis = [
-    ("CHART RECORDS", f"{len(data):,}", "Total selected entries"),
-    ("UNIQUE SONGS", f"{data['song'].nunique():,}", "Distinct tracks"),
-    ("ARTISTS", f"{data['artist'].nunique():,}", "Distinct performers"),
-    ("AVG. POPULARITY", f"{avg_popularity:.1f}" if pd.notna(avg_popularity) else "N/A", "Average popularity score"),
-]
-cols = st.columns(4)
-for col, (label, value, note) in zip(cols, kpis):
-    with col:
-        st.markdown(
-            f"""<div class="kpi-card">
-                <div class="kpi-label">{label}</div>
-                <div class="kpi-value">{value}</div>
-                <div class="kpi-note">{note}</div>
-            </div>""",
-            unsafe_allow_html=True
-        )
+avg_popularity = filtered_df["popularity"].mean()
 
-# ---------------------------------------------------------
-# CHART RANKING TRENDS
-# ---------------------------------------------------------
-st.markdown('<div class="section-heading">📈 Chart ranking trends</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Track how selected songs move through the Top 50 over time</div>', unsafe_allow_html=True)
+k1, k2, k3, k4 = st.columns(4)
 
-song_options = sorted(data["song"].unique().tolist())
-default_songs = song_options[:min(3, len(song_options))]
-selected_songs = st.multiselect(
-    "Choose tracks to compare",
-    options=song_options,
-    default=default_songs,
-    key="trend_songs"
-)
+with k1:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <h4>📊 Total Records</h4>
+        <h2>{total_records:,}</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
-if selected_songs:
-    trend_data = data[data["song"].isin(selected_songs)].sort_values("date")
-    fig = px.line(
-        trend_data,
-        x="date",
-        y="position",
-        color="song",
-        markers=True,
-        hover_data={"artist": True, "popularity": True, "position": True}
+with k2:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <h4>🎵 Unique Songs</h4>
+        <h2>{unique_songs:,}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k3:
+    st.markdown(f"""
+    <div class="kpi-card">
+        <h4>🎤 Total Artists</h4>
+        <h2>{unique_artists:,}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+with k4:
+    popularity_text = (
+        f"{avg_popularity:.1f}"
+        if pd.notna(avg_popularity)
+        else "N/A"
     )
-    fig.update_yaxes(autorange="reversed", title="Chart position", dtick=5)
-    fig.update_xaxes(title="")
-    fig.update_layout(**PLOT_LAYOUT, height=410, title="Song position over time")
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Select one or more tracks to display their ranking trends.")
 
-# ---------------------------------------------------------
-# TOP SONGS AND ARTISTS
-# ---------------------------------------------------------
-left, right = st.columns([1.15, 1])
+    st.markdown(f"""
+    <div class="kpi-card">
+        <h4>⭐ Average Popularity</h4>
+        <h2>{popularity_text}</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
-with left:
-    st.markdown('<div class="section-heading">🏆 Top-performing songs</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Tracks with the most chart appearances</div>', unsafe_allow_html=True)
 
-    song_stats = data.groupby(["song", "artist"]).agg(
-        chart_days=("date", "nunique"),
-        best_rank=("position", "min"),
-        average_popularity=("popularity", "mean")
-    ).reset_index()
+# ==========================================
+# CHART 1: RANKING TRENDS
+# ==========================================
 
-    song_stats = song_stats.sort_values(
-        ["chart_days", "best_rank"], ascending=[False, True]
-    ).head(10)
-    song_stats["average_popularity"] = song_stats["average_popularity"].round(1)
-    song_stats = song_stats.rename(columns={
-        "song": "Song",
-        "artist": "Artist",
-        "chart_days": "Chart Days",
-        "best_rank": "Best Rank",
-        "average_popularity": "Avg. Popularity"
-    })
-    st.dataframe(song_stats, use_container_width=True, hide_index=True)
-
-with right:
-    st.markdown('<div class="section-heading">🎤 Leading artists</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Artists ranked by playlist appearances</div>', unsafe_allow_html=True)
-
-    artist_stats = data.groupby("artist").agg(
-        appearances=("song", "size"),
-        unique_songs=("song", "nunique")
-    ).reset_index().nlargest(10, "appearances").sort_values("appearances")
-
-    fig = px.bar(
-        artist_stats,
-        x="appearances",
-        y="artist",
-        orientation="h",
-        text="appearances",
-        color="appearances",
-        color_continuous_scale=["#28583A", GREEN]
-    )
-    fig.update_traces(textposition="outside", cliponaxis=False)
-    fig.update_layout(
-        **PLOT_LAYOUT,
-        height=420,
-        title="Top 10 artists",
-        xaxis_title="Playlist appearances",
-        yaxis_title="",
-        coloraxis_showscale=False
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-# ---------------------------------------------------------
-# POPULARITY ANALYSIS
-# ---------------------------------------------------------
-st.markdown('<div class="section-heading">📊 Popularity and chart position</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Explore the relationship between a track’s popularity score and its chart rank</div>', unsafe_allow_html=True)
-
-if data["popularity"].notna().any():
-    fig = px.scatter(
-        data.dropna(subset=["popularity"]),
-        x="popularity",
-        y="position",
-        color="artist",
-        hover_data=["song", "artist", "date"],
-        opacity=0.72
-    )
-    fig.update_yaxes(autorange="reversed", title="Chart position")
-    fig.update_xaxes(title="Popularity score")
-    fig.update_layout(**PLOT_LAYOUT, height=420, title="Popularity score vs. chart position")
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Popularity values are not available in the selected records.")
-
-# ---------------------------------------------------------
-# EXPLICIT CONTENT AND ALBUM TYPE
-# ---------------------------------------------------------
-left, right = st.columns(2)
-
-with left:
-    st.markdown('<div class="section-heading">🎧 Content classification</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Average popularity by explicit-content category</div>', unsafe_allow_html=True)
-
-    if "is_explicit" in data.columns and data["popularity"].notna().any():
-        explicit_map = {
-            "true": "Explicit", "1": "Explicit", "yes": "Explicit",
-            "false": "Non-Explicit", "0": "Non-Explicit", "no": "Non-Explicit"
-        }
-        content_data = data.copy()
-        content_data["content_type"] = (
-            content_data["is_explicit"].astype(str).str.lower().str.strip()
-            .map(explicit_map).fillna("Unknown")
-        )
-        content_stats = content_data.groupby("content_type").agg(
-            average_popularity=("popularity", "mean")
-        ).reset_index()
-
-        fig = px.bar(
-            content_stats,
-            x="content_type",
-            y="average_popularity",
-            color="content_type",
-            color_discrete_sequence=[GREEN, "#6EAA83", "#64736A"]
-        )
-        fig.update_layout(
-            **PLOT_LAYOUT,
-            height=350,
-            title="Average popularity by content type",
-            xaxis_title="",
-            yaxis_title="Average popularity",
-            showlegend=False
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("Explicit-content or popularity data is not available.")
-
-with right:
-    st.markdown('<div class="section-heading">💿 Album type breakdown</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">Track count and average popularity by album type</div>', unsafe_allow_html=True)
-
-    if "album_type" in data.columns:
-        album_stats = data.groupby("album_type", dropna=False).agg(
-            average_popularity=("popularity", "mean"),
-            songs=("song", "nunique")
-        ).reset_index()
-        album_stats["average_popularity"] = album_stats["average_popularity"].round(1)
-        album_stats = album_stats.rename(columns={
-            "album_type": "Album Type",
-            "average_popularity": "Avg. Popularity",
-            "songs": "Unique Songs"
-        })
-        st.dataframe(album_stats, use_container_width=True, hide_index=True)
-    else:
-        st.info("Album type information is not available in this dataset.")
-
-# ---------------------------------------------------------
-# DURATION ANALYSIS
-# ---------------------------------------------------------
-st.markdown('<div class="section-heading">⏱️ Song duration insights</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Compare track length with popularity scores</div>', unsafe_allow_html=True)
-
-duration_data = data.dropna(subset=["duration_minutes", "popularity"])
-if not duration_data.empty:
-    fig = px.scatter(
-        duration_data,
-        x="duration_minutes",
-        y="popularity",
-        hover_data=["song", "artist"],
-        color="popularity",
-        color_continuous_scale=["#386447", GREEN],
-        opacity=0.75
-    )
-    fig.update_layout(
-        **PLOT_LAYOUT,
-        height=390,
-        title="Track duration vs. popularity",
-        xaxis_title="Duration (minutes)",
-        yaxis_title="Popularity score",
-        coloraxis_showscale=False
-    )
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Duration and popularity values are not available for this selection.")
-
-# ---------------------------------------------------------
-# PLAYLIST ENTRIES AND EXITS
-# ---------------------------------------------------------
-st.markdown('<div class="section-heading">🔄 Playlist movement</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Daily count of tracks entering and leaving the Top 50</div>', unsafe_allow_html=True)
-
-daily = data.groupby("date").apply(
-    lambda frame: set(zip(frame["song"], frame["artist"]))
-).sort_index()
-
-movement_records = []
-previous_tracks = set()
-
-for chart_date, current_tracks in daily.items():
-    movement_records.append({
-        "date": chart_date,
-        "New entries": len(current_tracks - previous_tracks),
-        "Exits": len(previous_tracks - current_tracks)
-    })
-    previous_tracks = current_tracks
-
-movement = pd.DataFrame(movement_records)
-if not movement.empty:
-    fig = px.line(
-        movement,
-        x="date",
-        y=["New entries", "Exits"],
-        markers=True,
-        color_discrete_sequence=[GREEN, "#E39A72"]
-    )
-    fig.update_layout(
-        **PLOT_LAYOUT,
-        height=380,
-        title="New entries and exits over time",
-        xaxis_title="",
-        yaxis_title="Number of tracks"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-# ---------------------------------------------------------
-# DATA EXPLORER AND DOWNLOAD
-# ---------------------------------------------------------
-st.markdown('<div class="section-heading">🔎 Explore chart records</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Review the filtered records and export them for further analysis</div>', unsafe_allow_html=True)
-
-with st.expander("Show filtered dataset", expanded=False):
-    st.dataframe(data, use_container_width=True, hide_index=True, height=350)
-
-csv_data = data.to_csv(index=False).encode("utf-8")
-st.download_button(
-    label="⬇️ Download filtered data (CSV)",
-    data=csv_data,
-    file_name="us_top_50_filtered_analysis.csv",
-    mime="text/csv"
-)
-
-st.markdown("---")
 st.markdown(
-    "<div style='text-align:center;color:#829087;font-size:12px;'>"
-    "US Top 50 Playlist Analytics · Built with Python, Pandas, Plotly & Streamlit"
-    "</div>",
+    '<div class="section-title">📈 Chart Ranking Trends</div>',
     unsafe_allow_html=True
 )
+
+daily_ranking = (
+    filtered_df.groupby("date", as_index=False)
+    .agg({"position": "mean"})
+)
+
+fig1 = px.line(
+    daily_ranking,
+    x="date",
+    y="position",
+    markers=True,
+    title="Average Chart Position Over Time"
+)
+
+fig1.update_traces(
+    line=dict(color=GREEN, width=3),
+    marker=dict(size=7)
+)
+
+fig1.update_yaxes(autorange="reversed")
+
+style_chart(fig1, 400)
+
+st.plotly_chart(fig1, use_container_width=True)
+
+
+# ==========================================
+# CHART 2: TOP ARTISTS
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">🎤 Top 10 Artists</div>',
+    unsafe_allow_html=True
+)
+
+top_artists = (
+    filtered_df.groupby("artist")
+    .size()
+    .reset_index(name="appearances")
+    .sort_values("appearances", ascending=False)
+    .head(10)
+)
+
+fig2 = px.bar(
+    top_artists.sort_values("appearances"),
+    x="appearances",
+    y="artist",
+    orientation="h",
+    title="Top 10 Artists by Chart Appearances"
+)
+
+fig2.update_traces(
+    marker_color=GREEN,
+    text="appearances",
+    textposition="outside"
+)
+
+style_chart(fig2, 430)
+
+st.plotly_chart(fig2, use_container_width=True)
+
+
+# ==========================================
+# CHART 3: POPULARITY VS RANK
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">⭐ Popularity vs Chart Rank</div>',
+    unsafe_allow_html=True
+)
+
+popularity_data = filtered_df.dropna(
+    subset=["popularity"]
+)
+
+if not popularity_data.empty:
+
+    fig3 = px.scatter(
+        popularity_data,
+        x="position",
+        y="popularity",
+        color="artist",
+        hover_data=["song"],
+        title="Song Popularity Compared with Chart Position",
+        opacity=0.75
+    )
+
+    fig3.update_xaxes(autorange="reversed")
+
+    style_chart(fig3, 450)
+
+    st.plotly_chart(fig3, use_container_width=True)
+
+else:
+    st.info("Popularity information is not available.")
+
+
+# ==========================================
+# CHART 4: EXPLICIT CONTENT
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">🔞 Explicit Content Analysis</div>',
+    unsafe_allow_html=True
+)
+
+def convert_explicit(value):
+    if pd.isna(value):
+        return "Unknown"
+
+    if isinstance(value, str):
+        value = value.strip().lower()
+
+        if value in ["true", "yes", "1"]:
+            return "Explicit"
+
+        if value in ["false", "no", "0"]:
+            return "Non-Explicit"
+
+        return "Unknown"
+
+    if value == 1 or value is True:
+        return "Explicit"
+
+    if value == 0 or value is False:
+        return "Non-Explicit"
+
+    return "Unknown"
+
+
+explicit_df = filtered_df.copy()
+
+explicit_df["explicit_status"] = (
+    explicit_df["is_explicit"].apply(convert_explicit)
+)
+
+explicit_counts = (
+    explicit_df["explicit_status"]
+    .value_counts()
+    .reset_index()
+)
+
+explicit_counts.columns = ["Content Type", "Count"]
+
+fig4 = px.pie(
+    explicit_counts,
+    names="Content Type",
+    values="Count",
+    hole=0.55,
+    title="Explicit vs Non-Explicit Songs"
+)
+
+fig4.update_traces(
+    textposition="inside",
+    textinfo="percent+label"
+)
+
+style_chart(fig4, 400)
+
+st.plotly_chart(fig4, use_container_width=True)
+
+
+# ==========================================
+# CHART 5: ALBUM TYPE
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">💿 Album Type Analysis</div>',
+    unsafe_allow_html=True
+)
+
+album_data = filtered_df.dropna(
+    subset=["album_type"]
+).copy()
+
+if not album_data.empty:
+
+    album_counts = (
+        album_data["album_type"]
+        .value_counts()
+        .reset_index()
+    )
+
+    album_counts.columns = ["Album Type", "Count"]
+
+    fig5 = px.bar(
+        album_counts,
+        x="Album Type",
+        y="Count",
+        title="Songs by Album Type",
+        text="Count"
+    )
+
+    fig5.update_traces(
+        marker_color=GREEN,
+        textposition="outside"
+    )
+
+    style_chart(fig5, 400)
+
+    st.plotly_chart(fig5, use_container_width=True)
+
+else:
+    st.info("Album type information is not available.")
+
+
+# ==========================================
+# CHART 6: SONG DURATION
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">⏱️ Song Duration Analysis</div>',
+    unsafe_allow_html=True
+)
+
+duration_data = filtered_df.dropna(
+    subset=["duration_minutes"]
+)
+
+if not duration_data.empty:
+
+    fig6 = px.histogram(
+        duration_data,
+        x="duration_minutes",
+        nbins=25,
+        title="Distribution of Song Durations",
+        labels={
+            "duration_minutes": "Duration (minutes)"
+        }
+    )
+
+    fig6.update_traces(
+        marker_color=GREEN,
+        opacity=0.85
+    )
+
+    style_chart(fig6, 400)
+
+    st.plotly_chart(fig6, use_container_width=True)
+
+else:
+    st.info("Song duration information is not available.")
+
+
+# ==========================================
+# CHART 7: NEW ENTRIES AND EXITS
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">🆕 New Entries and Exits</div>',
+    unsafe_allow_html=True
+)
+
+daily_songs = (
+    df.groupby("date")["song"]
+    .apply(set)
+    .sort_index()
+)
+
+dates = list(daily_songs.index)
+
+entry_records = []
+exit_records = []
+
+for i in range(1, len(dates)):
+
+    previous_songs = daily_songs.iloc[i - 1]
+    current_songs = daily_songs.iloc[i]
+
+    new_songs = current_songs - previous_songs
+    exited_songs = previous_songs - current_songs
+
+    entry_records.append({
+        "date": dates[i],
+        "New Entries": len(new_songs),
+        "Exited Songs": len(exited_songs)
+    })
+
+if entry_records:
+
+    movement_df = pd.DataFrame(entry_records)
+
+    movement_df = movement_df[
+        (movement_df["date"].dt.date >= start_date) &
+        (movement_df["date"].dt.date <= end_date)
+    ]
+
+    if not movement_df.empty:
+
+        fig7 = go.Figure()
+
+        fig7.add_trace(go.Bar(
+            x=movement_df["date"],
+            y=movement_df["New Entries"],
+            name="New Entries",
+            marker_color=GREEN
+        ))
+
+        fig7.add_trace(go.Bar(
+            x=movement_df["date"],
+            y=movement_df["Exited Songs"],
+            name="Exited Songs",
+            marker_color="#E85D75"
+        ))
+
+        fig7.update_layout(
+            barmode="group",
+            title="Daily Song Entries and Exits"
+        )
+
+        style_chart(fig7, 400)
+
+        st.plotly_chart(fig7, use_container_width=True)
+
+    else:
+        st.info("No song movement data for this date range.")
+
+else:
+    st.info("More than one chart date is required to analyze entries and exits.")
+
+
+# ==========================================
+# FILTERED DATA TABLE
+# ==========================================
+
+st.markdown(
+    '<div class="section-title">📋 Detailed Music Data</div>',
+    unsafe_allow_html=True
+)
+
+display_columns = [
+    "date",
+    "position",
+    "song",
+    "artist",
+    "popularity",
+    "duration_ms",
+    "is_explicit",
+    "album_type"
+]
+
+display_columns = [
+    col for col in display_columns
+    if col in filtered_df.columns
+]
+
+display_df = filtered_df[display_columns].copy()
+
+display_df = display_df.sort_values(
+    ["date", "position"],
+    ascending=[False, True]
+)
+
+st.dataframe(
+    display_df,
+    use_container_width=True,
+    hide_index=True
+)
+
+
+# ==========================================
+# CSV DOWNLOAD
+# ==========================================
+
+csv_data = filtered_df.to_csv(
+    index=False
+).encode("utf-8")
+
+st.download_button(
+    label="⬇️ Download Filtered Dataset",
+    data=csv_data,
+    file_name="US_Top_50_Filtered_Data.csv",
+    mime="text/csv",
+    use_container_width=True
+)
+
+
+# ==========================================
+# FOOTER
+# ==========================================
+
+st.markdown("---")
+
+st.markdown("""
+<div style="text-align:center; padding:15px;">
+    <h4 style="color:#1DB954;">
+        🎧 US TOP 50 | MUSIC ANALYTICS
+    </h4>
+    <p style="color:#A9B9AE;">
+        Interactive Music Data Analysis Dashboard
+    </p>
+    <p style="color:#728078; font-size:12px;">
+        Built with Python • Streamlit • Pandas • Plotly
+    </p>
+</div>
+""", unsafe_allow_html=True)
