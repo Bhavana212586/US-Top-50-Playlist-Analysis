@@ -20,7 +20,7 @@ st.markdown("""
 }
 
 [data-testid="stHeader"] {
-    background:#171020;
+    background:#171020 !important;
 }
 
 [data-testid="stSidebar"] {
@@ -36,6 +36,7 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
+/* KPI CARDS */
 .kpi {
     background:linear-gradient(135deg,#35204C,#493064);
     border:1px solid #9470BC;
@@ -52,6 +53,7 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
+/* DROPDOWNS */
 [data-baseweb="select"] > div {
     background:#493064 !important;
     border-color:#B58AE8 !important;
@@ -70,17 +72,24 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
-.stDateInput input {
+/* DATE FILTER */
+[data-testid="stDateInput"] input {
     background:#493064 !important;
     color:#FFFFFF !important;
     -webkit-text-fill-color:#FFFFFF !important;
     border:1px solid #B58AE8 !important;
+    font-weight:600 !important;
 }
 
-.stDateInput button {
+[data-testid="stDateInput"] label {
     color:#FFFFFF !important;
 }
 
+[data-testid="stDateInput"] button {
+    color:#FFFFFF !important;
+}
+
+/* BUTTONS */
 .stButton button,
 .stDownloadButton button {
     background:#B58AE8 !important;
@@ -90,16 +99,13 @@ st.markdown("""
     font-weight:bold !important;
 }
 
-.stTextInput input {
-    background:#493064 !important;
-    color:#FFFFFF !important;
-}
-
+/* TABLE */
 [data-testid="stDataFrame"] {
     border:1px solid #9470BC;
     border-radius:10px;
 }
 
+/* CHART TEXT */
 .js-plotly-plot .plotly text {
     fill:#FFFFFF !important;
 }
@@ -121,6 +127,7 @@ COLORS = [
 ]
 
 
+# CHART STYLE
 def chart_style(fig):
     fig.update_layout(
         template="plotly_dark",
@@ -161,8 +168,14 @@ for c in ["popularity", "duration_ms", "is_explicit", "album_type"]:
     if c not in df.columns:
         df[c] = None
 
-df["popularity"] = pd.to_numeric(df["popularity"], errors="coerce")
-df["duration_ms"] = pd.to_numeric(df["duration_ms"], errors="coerce")
+df["popularity"] = pd.to_numeric(
+    df["popularity"], errors="coerce"
+)
+
+df["duration_ms"] = pd.to_numeric(
+    df["duration_ms"], errors="coerce"
+)
+
 df["duration_minutes"] = df["duration_ms"] / 60000
 
 if df.empty:
@@ -170,7 +183,7 @@ if df.empty:
     st.stop()
 
 
-# SIDEBAR
+# SIDEBAR FILTERS
 st.sidebar.title("🎧 Music Analytics")
 st.sidebar.markdown("### Dashboard Filters")
 
@@ -206,9 +219,13 @@ data = df.copy()
 if isinstance(date_range, (tuple, list)):
     if len(date_range) == 2:
         start_date, end_date = date_range
+
         data = data[
-            data["date"].dt.date.between(start_date, end_date)
+            data["date"].dt.date.between(
+                start_date, end_date
+            )
         ]
+
     elif len(date_range) == 1:
         data = data[
             data["date"].dt.date == date_range[0]
@@ -271,11 +288,17 @@ for col, (label, value) in zip(cols, metrics):
 st.header("🎤 Selected Artist Songs")
 
 if selected_artists:
+
     artist_songs = data[
         data["artist"].isin(selected_artists)
-    ][["artist", "song", "position", "date"]]
+    ][["artist", "song", "position", "date"]].copy()
 
     artist_songs = artist_songs.drop_duplicates()
+
+    # REMOVE TIME FROM DATE
+    artist_songs["date"] = (
+        artist_songs["date"].dt.strftime("%Y-%m-%d")
+    )
 
     artist_songs = artist_songs.sort_values(
         ["artist", "position"]
@@ -286,8 +309,11 @@ if selected_artists:
         use_container_width=True,
         hide_index=True
     )
+
 else:
-    st.info("Select an artist from the sidebar to view their songs.")
+    st.info(
+        "Select an artist from the sidebar to view their songs."
+    )
 
 
 # RANKING TRENDS
@@ -346,6 +372,7 @@ st.header("⭐ Popularity vs Chart Rank")
 pop = data.dropna(subset=["popularity"])
 
 if not pop.empty:
+
     fig = px.scatter(
         pop,
         x="position",
@@ -361,6 +388,7 @@ if not pop.empty:
         chart_style(fig),
         use_container_width=True
     )
+
 else:
     st.info("Popularity data unavailable.")
 
@@ -396,6 +424,7 @@ if data["is_explicit"].notna().any():
         chart_style(fig),
         use_container_width=True
     )
+
 else:
     st.info("Explicit content data unavailable.")
 
@@ -406,6 +435,7 @@ st.header("💿 Album Type Analysis")
 album = data.dropna(subset=["album_type"])
 
 if not album.empty:
+
     counts = album["album_type"].value_counts().reset_index()
     counts.columns = ["Album Type", "Count"]
 
@@ -422,6 +452,7 @@ if not album.empty:
         chart_style(fig),
         use_container_width=True
     )
+
 else:
     st.info("Album type data unavailable.")
 
@@ -432,6 +463,7 @@ st.header("⏱️ Song Duration Analysis")
 duration = data.dropna(subset=["duration_minutes"])
 
 if not duration.empty:
+
     fig = px.histogram(
         duration,
         x="duration_minutes",
@@ -444,21 +476,25 @@ if not duration.empty:
         chart_style(fig),
         use_container_width=True
     )
+
 else:
     st.info("Song duration data unavailable.")
 
 
-# DATA TABLE
+# COMPLETE DATASET
 st.header("📋 Complete Music Dataset")
 
 st.dataframe(
-    data.sort_values(["date", "position"], ascending=[False, True]),
+    data.sort_values(
+        ["date", "position"],
+        ascending=[False, True]
+    ),
     use_container_width=True,
     hide_index=True
 )
 
 
-# DOWNLOAD
+# DOWNLOAD DATA
 st.download_button(
     "⬇️ Download Filtered Dataset",
     data=data.to_csv(index=False).encode("utf-8"),
