@@ -73,21 +73,35 @@ st.markdown("""
 }
 
 /* DATE FILTER */
-[data-testid="stDateInput"] input {
-    background:#493064 !important;
-    color:#FFFFFF !important;
-    -webkit-text-fill-color:#FFFFFF !important;
-    border:1px solid #B58AE8 !important;
-    font-weight:600 !important;
+
+/* FIX DATE FILTER VISIBILITY */
+[data-testid="stDateInput"] {
+    background-color: #241536 !important;
 }
 
-[data-testid="stDateInput"] label {
-    color:#FFFFFF !important;
+[data-testid="stDateInput"] input,
+[data-testid="stDateInput"] [data-baseweb="input"] {
+    background-color: #493064 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    opacity: 1 !important;
+    border: 1px solid #B58AE8 !important;
 }
 
 [data-testid="stDateInput"] button {
-    color:#FFFFFF !important;
+    background-color: #493064 !important;
+    color: #FFFFFF !important;
 }
+
+[data-testid="stDateInput"] svg {
+    fill: #FFFFFF !important;
+    color: #FFFFFF !important;
+}
+
+[data-testid="stDateInput"] label {
+    color: #FFFFFF !important;
+}
+
 
 /* BUTTONS */
 .stButton button,
