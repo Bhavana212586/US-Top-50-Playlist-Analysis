@@ -17,110 +17,51 @@ st.set_page_config(
 # ---------------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
-}
-.stApp {
-    background: linear-gradient(135deg, #101411 0%, #111816 55%, #101312 100%);
-    color: #F5F7F5;
-}
+/* Make sidebar and filter text clearly visible */
+
 [data-testid="stSidebar"] {
-    background: #151B18;
-    border-right: 1px solid #26332B;
+    color: #FFFFFF !important;
 }
-[data-testid="stSidebar"] * {
-    color: #E8EEE9;
+
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: #FFFFFF !important;
 }
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    max-width: 1500px;
+
+/* Text input */
+[data-testid="stSidebar"] input {
+    color: #FFFFFF !important;
+    background-color: #26332B !important;
 }
-.hero {
-    background: linear-gradient(115deg, #1B3527 0%, #183D2A 48%, #10251B 100%);
-    border: 1px solid #2B6844;
-    border-radius: 22px;
-    padding: 30px 34px;
-    margin-bottom: 25px;
+
+/* Dropdown and multiselect */
+[data-testid="stSidebar"] [data-baseweb="select"] * {
+    color: #FFFFFF !important;
+    background-color: #26332B;
 }
-.hero-kicker {
-    color: #9BE7B2;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
+
+/* Slider labels and values */
+[data-testid="stSidebar"] [data-testid="stSlider"] * {
+    color: #FFFFFF !important;
 }
-.hero h1 {
-    color: #FFFFFF;
-    font-size: clamp(28px, 4vw, 42px);
-    font-weight: 800;
-    margin: 0 0 8px 0;
-    letter-spacing: -1.2px;
+
+/* Date picker */
+[data-testid="stSidebar"] [data-testid="stDateInput"] input {
+    color: #FFFFFF !important;
+    background-color: #26332B !important;
 }
-.hero p {
-    color: #D0E2D5;
-    font-size: 15px;
-    margin: 0;
+
+/* Placeholder text */
+[data-testid="stSidebar"] input::placeholder {
+    color: #BFCBC2 !important;
+    opacity: 1;
 }
-.section-heading {
-    color: #F4F7F4;
-    font-size: 21px;
-    font-weight: 700;
-    margin: 26px 0 5px 0;
-}
-.section-subtitle {
-    color: #9AA79E;
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-.kpi-card {
-    background: linear-gradient(145deg, #1B241F, #18201B);
-    border: 1px solid #2B3B30;
-    border-radius: 16px;
-    padding: 19px 20px;
-    min-height: 118px;
-}
-.kpi-label {
-    color: #AAB8AE;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-.kpi-value {
-    color: #FFFFFF;
-    font-size: 29px;
-    font-weight: 800;
-    margin-top: 9px;
-}
-.kpi-note {
-    color: #8FD6A5;
-    font-size: 11px;
-    margin-top: 3px;
-}
-div[data-testid="stDataFrame"] {
-    border: 1px solid #2B3B30;
-    border-radius: 12px;
-    overflow: hidden;
-}
-.stButton button, .stDownloadButton button {
-    background: #1DB954;
-    color: #07130B;
-    border: none;
-    border-radius: 9px;
-    font-weight: 700;
-}
-.stButton button:hover, .stDownloadButton button:hover {
-    background: #35D36D;
-    color: #07130B;
-}
-hr {
-    border-color: #29362E;
-}
-footer {visibility: hidden;}
+
 </style>
 """, unsafe_allow_html=True)
 
