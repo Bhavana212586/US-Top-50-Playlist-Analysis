@@ -53,7 +53,7 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
-/* DROPDOWNS */
+/* ARTIST DROPDOWN */
 [data-baseweb="select"] > div {
     background:#493064 !important;
     border-color:#B58AE8 !important;
@@ -72,40 +72,44 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
-/* DATE FILTER */
-
-
-/* DATE RANGE - MATCH SELECT ARTIST */
-[data-testid="stDateInput"] input {
-    background-color: #493064 !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    border: 1px solid #B58AE8 !important;
-    border-radius: 8px !important;
-    opacity: 1 !important;
+/* DATE RANGE - PURPLE BACKGROUND */
+[data-testid="stDateInput"] {
+    background:#241536 !important;
 }
 
 [data-testid="stDateInput"] [data-baseweb="input"] {
-    background-color: #493064 !important;
+    background-color:#493064 !important;
+    border:1px solid #B58AE8 !important;
+    border-radius:8px !important;
+}
+
+[data-testid="stDateInput"] input {
+    background-color:#493064 !important;
+    color:#FFFFFF !important;
+    -webkit-text-fill-color:#FFFFFF !important;
+    border:none !important;
+    opacity:1 !important;
 }
 
 [data-testid="stDateInput"] button {
-    background-color: #493064 !important;
-    color: #FFFFFF !important;
+    background-color:#493064 !important;
+    color:#FFFFFF !important;
 }
 
 [data-testid="stDateInput"] svg {
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
+    color:#FFFFFF !important;
+    fill:#FFFFFF !important;
 }
 
-    color: #FFFFFF !important;
+/* DATE CALENDAR POPUP */
+[data-baseweb="calendar"] {
+    background:#35204C !important;
+    color:#FFFFFF !important;
 }
 
-[data-testid="stDateInput"] label {
-    color: #FFFFFF !important;
+[data-baseweb="calendar"] * {
+    color:#FFFFFF !important;
 }
-
 
 /* BUTTONS */
 .stButton button,
@@ -215,19 +219,10 @@ date_range = st.sidebar.date_input(
     max_value=max_date
 )
 
-artists = sorted(df["artist"].unique())
-
 selected_artists = st.sidebar.multiselect(
     "🎤 Select Artist",
-    artists,
+    sorted(df["artist"].unique()),
     placeholder="Choose artist"
-)
-
-position_range = st.sidebar.slider(
-    "🏆 Chart Position",
-    1,
-    50,
-    (1, 50)
 )
 
 
@@ -248,10 +243,6 @@ if isinstance(date_range, (tuple, list)):
         data = data[
             data["date"].dt.date == date_range[0]
         ]
-
-data = data[
-    data["position"].between(*position_range)
-]
 
 if selected_artists:
     data = data[
@@ -313,7 +304,6 @@ if selected_artists:
 
     artist_songs = artist_songs.drop_duplicates()
 
-    # REMOVE TIME FROM DATE
     artist_songs["date"] = (
         artist_songs["date"].dt.strftime("%Y-%m-%d")
     )
@@ -334,7 +324,7 @@ else:
     )
 
 
-# RANKING TRENDS
+# CHART RANKING TRENDS
 st.header("📈 Chart Ranking Trends")
 
 trend = (
@@ -512,7 +502,7 @@ st.dataframe(
 )
 
 
-# DOWNLOAD DATA
+# DOWNLOAD
 st.download_button(
     "⬇️ Download Filtered Dataset",
     data=data.to_csv(index=False).encode("utf-8"),
