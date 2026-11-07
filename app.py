@@ -16,53 +16,84 @@ st.set_page_config(
 # PROFESSIONAL DARK THEME
 # ---------------------------------------------------------
 st.markdown("""
-<style>
 
-/* Make sidebar and filter text clearly visible */
+/* ===== DARK THEME FIX ===== */
+
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background: #101411 !important;
+    color: #FFFFFF !important;
+}
+
+[data-testid="stHeader"] {
+    background: #101411 !important;
+}
 
 [data-testid="stSidebar"] {
+    background: #151B18 !important;
+}
+
+[data-testid="stSidebar"] * {
     color: #FFFFFF !important;
 }
 
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: #FFFFFF !important;
+/* Main page text */
+.stApp h1,
+.stApp h2,
+.stApp h3,
+.stApp p,
+.stApp label,
+.stApp span {
+    color: #F5F7F5;
 }
 
-/* Text input */
-[data-testid="stSidebar"] input {
-    color: #FFFFFF !important;
+/* Hero section */
+.hero {
+    background: linear-gradient(115deg, #1B3527, #10251B) !important;
+    border: 1px solid #2B6844;
+}
+
+/* KPI cards */
+.kpi-card {
+    background: #1B241F !important;
+    border: 1px solid #2B3B30;
+}
+
+/* Input fields */
+.stApp input,
+.stApp textarea,
+[data-baseweb="select"] > div {
     background-color: #26332B !important;
-}
-
-/* Dropdown and multiselect */
-[data-testid="stSidebar"] [data-baseweb="select"] * {
-    color: #FFFFFF !important;
-    background-color: #26332B;
-}
-
-/* Slider labels and values */
-[data-testid="stSidebar"] [data-testid="stSlider"] * {
     color: #FFFFFF !important;
 }
 
-/* Date picker */
-[data-testid="stSidebar"] [data-testid="stDateInput"] input {
-    color: #FFFFFF !important;
-    background-color: #26332B !important;
+/* Dropdown selected values */
+[data-baseweb="tag"] {
+    background-color: #1DB954 !important;
+    color: #07130B !important;
 }
 
-/* Placeholder text */
-[data-testid="stSidebar"] input::placeholder {
+[data-baseweb="tag"] * {
+    color: #07130B !important;
+}
+
+/* Slider */
+[data-testid="stSlider"] {
+    color: #1DB954 !important;
+}
+
+/* Data tables */
+[data-testid="stDataFrame"] {
+    background: #1B241F !important;
+    color: #FFFFFF !important;
+}
+
+/* Placeholder */
+input::placeholder {
     color: #BFCBC2 !important;
-    opacity: 1;
+    opacity: 1 !important;
 }
 
-</style>
 """, unsafe_allow_html=True)
 
 GREEN = "#1DB954"
