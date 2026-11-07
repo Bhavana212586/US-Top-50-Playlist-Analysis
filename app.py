@@ -181,6 +181,7 @@ if df.empty:
     st.error("The dataset does not contain any valid chart records.")
     st.stop()
 
+
 # ---------------------------------------------------------
 # SIDEBAR FILTERS
 # ---------------------------------------------------------
@@ -189,43 +190,91 @@ st.sidebar.caption("US TOP 50 • INTERACTIVE DASHBOARD")
 st.sidebar.markdown("---")
 st.sidebar.markdown("### Filter your data")
 
+# Date filter
 min_date = df["date"].min().date()
 max_date = df["date"].max().date()
 
 date_range = st.sidebar.date_input(
-    "Chart date range",
+    "📅 Chart date range",
     value=(min_date, max_date),
     min_value=min_date,
     max_value=max_date
 )
 
-available_artists = sorted(df["artist"].dropna().unique().tolist())
+# Artist filter
+available_artists = sorted(df["artist"].unique())
+
 selected_artists = st.sidebar.multiselect(
-    "Select artists",
+    "🎤 Select artists",
     options=available_artists,
-    placeholder="All artists"
+    placeholder="Choose artists"
 )
 
-search_song = st.sidebar.text_input("Search a song", placeholder="Enter song title...")
+# Song search
+search_song = st.sidebar.text_input(
+    "🎵 Search song",
+    placeholder="Enter song name..."
+)
 
+# Chart position filter
+position_range = st.sidebar.slider(
+    "🏆 Chart position",
+    min_value=1,
+    max_value=50,
+    value=(1, 50)
+)
+
+# Popularity filter
+popularity_range = st.sidebar.slider(
+    "⭐ Popularity score",
+    min_value=0,
+    max_value=100,
+    value=(0, 100)
+)
+
+# Apply filters
 data = df.copy()
 
-if isinstance(date_range, (tuple, list)) and len(date_range) == 2:
-    data = data[data["date"].dt.date.between(date_range[0], date_range[1])]
+if isinstance(date_range, (tuple, list)):
+    if len(date_range) == 2:
+        data = data[
+            data["date"].dt.date.between(
+                date_range[0], date_range[1]
+            )
+        ]
+elif date_range:
+    data = data[data["date"].dt.date == date_range]
 
 if selected_artists:
     data = data[data["artist"].isin(selected_artists)]
 
 if search_song.strip():
-    data = data[data["song"].str.contains(search_song.strip(), case=False, na=False)]
+    data = data[
+        data["song"].str.contains(
+            search_song.strip(),
+            case=False,
+            na=False
+        )
+    ]
+
+data = data[
+    data["position"].between(
+        position_range[0],
+        position_range[1]
+    )
+]
+
+if data["popularity"].notna().any():
+    data = data[
+        data["popularity"].between(
+            popularity_range[0],
+            popularity_range[1]
+        )
+    ]
 
 st.sidebar.markdown("---")
-st.sidebar.caption(f"Dataset records: {len(df):,}")
-st.sidebar.caption("Use the filters above to explore chart performance.")
-
-if data.empty:
-    st.warning("No records match the selected filters. Try changing the date range or filters.")
-    st.stop()
+st.sidebar.success(f"Showing {len(data):,} records")
+st.sidebar.caption(f"Total dataset records: {len(df):,}")
 
 # ---------------------------------------------------------
 # HEADER
