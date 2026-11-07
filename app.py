@@ -74,18 +74,19 @@ st.markdown("""
 
 /* DATE FILTER */
 
-/* FIX DATE FILTER VISIBILITY */
-[data-testid="stDateInput"] {
-    background-color: #241536 !important;
-}
 
-[data-testid="stDateInput"] input,
-[data-testid="stDateInput"] [data-baseweb="input"] {
+/* DATE RANGE - MATCH SELECT ARTIST */
+[data-testid="stDateInput"] input {
     background-color: #493064 !important;
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
-    opacity: 1 !important;
     border: 1px solid #B58AE8 !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stDateInput"] [data-baseweb="input"] {
+    background-color: #493064 !important;
 }
 
 [data-testid="stDateInput"] button {
@@ -94,7 +95,10 @@ st.markdown("""
 }
 
 [data-testid="stDateInput"] svg {
+    color: #FFFFFF !important;
     fill: #FFFFFF !important;
+}
+
     color: #FFFFFF !important;
 }
 
