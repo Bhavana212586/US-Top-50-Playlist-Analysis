@@ -14,29 +14,38 @@ st.set_page_config(
 # PURPLE + LAVENDER THEME
 st.markdown("""
 <style>
-/* Make sidebar filter labels visible */
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span {
+/* Filter labels */
+[data-testid="stSidebar"] label {
     color: #FFFFFF !important;
 }
 
-/* Date input text */
-[data-testid="stSidebar"] input {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
+/* Date input and artist select box */
+[data-testid="stSidebar"] input,
+[data-testid="stSidebar"] [data-baseweb="select"] div {
+    color: #321744 !important;
+    -webkit-text-fill-color: #321744 !important;
 }
 
-/* Selectbox text */
-[data-testid="stSidebar"] [data-baseweb="select"] * {
-    color: #FFFFFF !important;
+/* Dropdown options */
+[data-baseweb="popover"],
+[data-baseweb="menu"],
+[data-baseweb="menu"] * {
+    background-color: #FFFFFF !important;
+    color: #321744 !important;
 }
 
-/* Calendar and dropdown icons */
-[data-testid="stSidebar"] svg {
-    fill: #FFFFFF !important;
-    color: #FFFFFF !important;
+/* Selected option */
+[data-baseweb="select"] [aria-selected="true"] {
+    color: #321744 !important;
 }
+
+/* Dropdown arrow */
+[data-testid="stSidebar"] [data-baseweb="select"] svg {
+    fill: #321744 !important;
+    color: #321744 !important;
+}
+
+
 .stApp {
     background:#171020 !important;
     color:#FFFFFF !important;
