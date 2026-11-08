@@ -53,7 +53,7 @@ st.markdown("""
     fill: #321744 !important;
 }
 
-/* ARTIST SELECT BOX: dark text on white box */
+/* ARTIST SELECT BOX */
 [data-testid="stSidebar"] [data-baseweb="select"] > div {
     background: #FFFFFF !important;
     border-color: #B58AE8 !important;
@@ -64,7 +64,7 @@ st.markdown("""
     fill: #321744 !important;
 }
 
-/* ARTIST DROPDOWN: white text on dark purple */
+/* ARTIST DROPDOWN OPTIONS */
 [data-baseweb="popover"],
 [data-baseweb="popover"] [role="listbox"] {
     background: #35204C !important;
@@ -458,17 +458,9 @@ if not duration.empty:
     fig = px.histogram(
         duration,
         x="duration_minutes",
-        nbins=15,
+        nbins=20,
         title="Distribution of Song Durations",
         color_discrete_sequence=["#B58AE8"]
-    )
-
-    fig.update_layout(
-        height=350,
-        bargap=0.15,
-        xaxis_title="Song Duration (Minutes)",
-        yaxis_title="Number of Songs",
-        margin=dict(l=40, r=30, t=60, b=40)
     )
 
     st.plotly_chart(
@@ -476,8 +468,36 @@ if not duration.empty:
         use_container_width=True
     )
 
+    # Temporary data check to identify why the histogram looks like one bar.
+    with st.expander("Check song duration data"):
+        st.write("Total duration records:", len(duration))
+        st.write(
+            "Duration range (minutes):",
+            round(float(duration["duration_minutes"].min()), 3),
+            "to",
+            round(float(duration["duration_minutes"].max()), 3)
+        )
+        st.write(
+            "Unique duration values:",
+            int(duration["duration_minutes"].nunique())
+        )
+
 else:
     st.info("Song duration data unavailable.")
+
+
+# COMPLETE DATASET
+st.header("📋 Complete Music Dataset")
+
+st.dataframe(
+    data.sort_values(
+        ["date", "position"],
+        ascending=[False, True]
+    ),
+    use_container_width=True,
+    hide_index=True
+)
+
 
 # DOWNLOAD
 st.download_button(
