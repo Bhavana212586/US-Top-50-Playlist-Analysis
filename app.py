@@ -14,182 +14,110 @@ st.set_page_config(
 # PURPLE + LAVENDER THEME
 st.markdown("""
 <style>
-/* Filter labels */
-[data-testid="stSidebar"] label {
+/* MAIN BACKGROUND */
+.stApp {
+    background: #171020 !important;
+    color: #FFFFFF !important;
+}
+[data-testid="stHeader"] {
+    background: #171020 !important;
+}
+
+/* SIDEBAR */
+[data-testid="stSidebar"] {
+    background: #241536 !important;
+}
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
     color: #FFFFFF !important;
 }
 
-/* Date input and artist select box */
-[data-testid="stSidebar"] input,
-[data-testid="stSidebar"] [data-baseweb="select"] div {
+/* DATE RANGE: dark text on white box */
+[data-testid="stSidebar"] [data-testid="stDateInput"] input {
+    background: #FFFFFF !important;
     color: #321744 !important;
     -webkit-text-fill-color: #321744 !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
 }
-
-/* Dropdown options */
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-[data-baseweb="menu"] * {
-    background-color: #FFFFFF !important;
+[data-testid="stSidebar"] [data-testid="stDateInput"] button {
+    background: #FFFFFF !important;
     color: #321744 !important;
+    opacity: 1 !important;
 }
-
-/* Selected option */
-[data-baseweb="select"] [aria-selected="true"] {
+[data-testid="stSidebar"] [data-testid="stDateInput"] button svg {
     color: #321744 !important;
-}
-
-/* Dropdown arrow */
-[data-testid="stSidebar"] [data-baseweb="select"] svg {
     fill: #321744 !important;
+}
+
+/* ARTIST SELECT BOX: dark text on white box */
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background: #FFFFFF !important;
+    border-color: #B58AE8 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="select"] *,
+[data-testid="stSidebar"] [data-baseweb="select"] svg {
     color: #321744 !important;
+    fill: #321744 !important;
 }
 
-
-.stApp {
-    background:#171020 !important;
-    color:#FFFFFF !important;
+/* ARTIST DROPDOWN: white text on dark purple */
+[data-baseweb="popover"],
+[data-baseweb="popover"] [role="listbox"] {
+    background: #35204C !important;
 }
-
-[data-testid="stHeader"] {
-    background:#171020 !important;
+[data-baseweb="popover"] [role="option"],
+[data-baseweb="popover"] [role="option"] * {
+    background: #35204C !important;
+    color: #FFFFFF !important;
 }
-
-[data-testid="stSidebar"] {
-    background:#241536 !important;
-}
-
-.stApp h1,.stApp h2,.stApp h3,
-.stApp p,.stApp label,.stApp span {
-    color:#F8F4FF !important;
-}
-
-[data-testid="stSidebar"] * {
-    color:#FFFFFF !important;
+[data-baseweb="popover"] [role="option"]:hover,
+[data-baseweb="popover"] [role="option"]:hover * {
+    background: #65418A !important;
+    color: #FFFFFF !important;
 }
 
 /* KPI CARDS */
 .kpi {
-    background:linear-gradient(135deg,#35204C,#493064);
-    border:1px solid #9470BC;
-    border-radius:12px;
-    padding:18px;
-    text-align:center;
+    background: linear-gradient(135deg, #35204C, #493064);
+    border: 1px solid #9470BC;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
 }
-
 .kpi h2 {
-    color:#D0B4F5 !important;
+    color: #D0B4F5 !important;
 }
-
 .kpi p {
-    color:#FFFFFF !important;
-}
-
-/* ARTIST DROPDOWN */
-[data-baseweb="select"] > div {
-    background:#493064 !important;
-    border-color:#B58AE8 !important;
-    color:#FFFFFF !important;
-}
-
-[data-baseweb="select"] * {
-    color:#FFFFFF !important;
-}
-
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-[role="listbox"],
-[role="option"] {
-    background:#35204C !important;
-    color:#FFFFFF !important;
-}
-
-/* Filter labels */
-[data-testid="stSidebar"] label {
     color: #FFFFFF !important;
-}
-
-/* Date range text */
-[data-testid="stSidebar"] input {
-    color: #321744 !important;
-    -webkit-text-fill-color: #321744 !important;
-    opacity: 1 !important;
-}
-
-/* Artist dropdown selected text */
-[data-testid="stSidebar"] [data-baseweb="select"] {
-    color: #321744 !important;
-}
-
-[data-testid="stSidebar"] [data-baseweb="select"] div,
-[data-testid="stSidebar"] [data-baseweb="select"] span {
-    color: #321744 !important;
-}
-
-/* Dropdown options */
-[data-baseweb="popover"] *,
-[role="listbox"] * {
-    color: #321744 !important;
-}
-
-/* Calendar and dropdown icons */
-[data-testid="stSidebar"] svg {
-    color: #321744 !important;
 }
 
 /* BUTTONS */
 .stButton button,
 .stDownloadButton button {
-    background:#B58AE8 !important;
-    color:#241536 !important;
-    border:0 !important;
-    border-radius:8px !important;
-    font-weight:bold !important;
+    background: #B58AE8 !important;
+    color: #241536 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
 }
 
 /* TABLE */
 [data-testid="stDataFrame"] {
-    border:1px solid #9470BC;
-    border-radius:10px;
+    border: 1px solid #9470BC;
+    border-radius: 10px;
 }
 
 /* CHART TEXT */
 .js-plotly-plot .plotly text {
-    fill:#FFFFFF !important;
-}
-
-hr {
-    border-color:#76529B !important;
-}
-
-/* FORCE DATE BOX PURPLE */
-[data-testid="stDateInput"] div[data-baseweb="input"],
-[data-testid="stDateInput"] div[data-baseweb="input"] > div,
-[data-testid="stDateInput"] div[data-baseweb="input"] div {
-    background: #493064 !important;
-    background-color: #493064 !important;
-    border-color: #B58AE8 !important;
-}
-
-/* DATE TEXT */
-[data-testid="stDateInput"] input {
-    background: transparent !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    opacity: 1 !important;
-}
-
-/* CALENDAR BUTTON */
-[data-testid="stDateInput"] button {
-    background: #493064 !important;
-    color: #FFFFFF !important;
-}
-
-[data-testid="stDateInput"] svg {
-    color: #FFFFFF !important;
     fill: #FFFFFF !important;
 }
-
+hr {
+    border-color: #76529B !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
