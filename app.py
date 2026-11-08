@@ -14,6 +14,29 @@ st.set_page_config(
 # PURPLE + LAVENDER THEME
 st.markdown("""
 <style>
+/* Make sidebar filter labels visible */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span {
+    color: #FFFFFF !important;
+}
+
+/* Date input text */
+[data-testid="stSidebar"] input {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Selectbox text */
+[data-testid="stSidebar"] [data-baseweb="select"] * {
+    color: #FFFFFF !important;
+}
+
+/* Calendar and dropdown icons */
+[data-testid="stSidebar"] svg {
+    fill: #FFFFFF !important;
+    color: #FFFFFF !important;
+}
 .stApp {
     background:#171020 !important;
     color:#FFFFFF !important;
