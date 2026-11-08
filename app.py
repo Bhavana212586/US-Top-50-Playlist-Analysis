@@ -458,9 +458,17 @@ if not duration.empty:
     fig = px.histogram(
         duration,
         x="duration_minutes",
-        nbins=20,
+        nbins=15,
         title="Distribution of Song Durations",
         color_discrete_sequence=["#B58AE8"]
+    )
+
+    fig.update_layout(
+        height=350,
+        bargap=0.15,
+        xaxis_title="Song Duration (Minutes)",
+        yaxis_title="Number of Songs",
+        margin=dict(l=40, r=30, t=60, b=40)
     )
 
     st.plotly_chart(
@@ -470,20 +478,6 @@ if not duration.empty:
 
 else:
     st.info("Song duration data unavailable.")
-
-
-# COMPLETE DATASET
-st.header("📋 Complete Music Dataset")
-
-st.dataframe(
-    data.sort_values(
-        ["date", "position"],
-        ascending=[False, True]
-    ),
-    use_container_width=True,
-    hide_index=True
-)
-
 
 # DOWNLOAD
 st.download_button(
