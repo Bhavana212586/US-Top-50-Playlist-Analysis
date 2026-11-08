@@ -104,32 +104,37 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
+/* Filter labels */
+[data-testid="stSidebar"] label {
+    color: #FFFFFF !important;
+}
+
 /* Date range text */
-[data-testid="stSidebar"] [data-testid="stDateInput"] input {
+[data-testid="stSidebar"] input {
     color: #321744 !important;
     -webkit-text-fill-color: #321744 !important;
     opacity: 1 !important;
 }
 
-/* Calendar icon */
-[data-testid="stSidebar"] [data-testid="stDateInput"] button {
-    color: #321744 !important;
-    opacity: 1 !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stDateInput"] button svg {
-    fill: #321744 !important;
+/* Artist dropdown selected text */
+[data-testid="stSidebar"] [data-baseweb="select"] {
     color: #321744 !important;
 }
 
-/* Artist dropdown arrow */
-[data-testid="stSidebar"] [data-baseweb="select"] svg {
-    fill: #321744 !important;
+[data-testid="stSidebar"] [data-baseweb="select"] div,
+[data-testid="stSidebar"] [data-baseweb="select"] span {
     color: #321744 !important;
 }
 
-[data-baseweb="calendar"] * {
-    color:#FFFFFF !important;
+/* Dropdown options */
+[data-baseweb="popover"] *,
+[role="listbox"] * {
+    color: #321744 !important;
+}
+
+/* Calendar and dropdown icons */
+[data-testid="stSidebar"] svg {
+    color: #321744 !important;
 }
 
 /* BUTTONS */
