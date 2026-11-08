@@ -104,39 +104,28 @@ st.markdown("""
     color:#FFFFFF !important;
 }
 
-/* DATE RANGE - PURPLE BACKGROUND */
-[data-testid="stDateInput"] {
-    background:#241536 !important;
+/* Date range text */
+[data-testid="stSidebar"] [data-testid="stDateInput"] input {
+    color: #321744 !important;
+    -webkit-text-fill-color: #321744 !important;
+    opacity: 1 !important;
 }
 
-[data-testid="stDateInput"] [data-baseweb="input"] {
-    background-color:#493064 !important;
-    border:1px solid #B58AE8 !important;
-    border-radius:8px !important;
+/* Calendar icon */
+[data-testid="stSidebar"] [data-testid="stDateInput"] button {
+    color: #321744 !important;
+    opacity: 1 !important;
 }
 
-[data-testid="stDateInput"] input {
-    background-color:#493064 !important;
-    color:#FFFFFF !important;
-    -webkit-text-fill-color:#FFFFFF !important;
-    border:none !important;
-    opacity:1 !important;
+[data-testid="stSidebar"] [data-testid="stDateInput"] button svg {
+    fill: #321744 !important;
+    color: #321744 !important;
 }
 
-[data-testid="stDateInput"] button {
-    background-color:#493064 !important;
-    color:#FFFFFF !important;
-}
-
-[data-testid="stDateInput"] svg {
-    color:#FFFFFF !important;
-    fill:#FFFFFF !important;
-}
-
-/* DATE CALENDAR POPUP */
-[data-baseweb="calendar"] {
-    background:#35204C !important;
-    color:#FFFFFF !important;
+/* Artist dropdown arrow */
+[data-testid="stSidebar"] [data-baseweb="select"] svg {
+    fill: #321744 !important;
+    color: #321744 !important;
 }
 
 [data-baseweb="calendar"] * {
