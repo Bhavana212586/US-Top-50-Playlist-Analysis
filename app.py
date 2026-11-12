@@ -535,12 +535,13 @@ else:
 
 
 # --------------------------------------------------
-# SONG DURATION ANALYSIS - HORIZONTAL HISTOGRAM
+# SONG DURATION ANALYSIS
 # --------------------------------------------------
 st.header("⏱️ Song Duration Analysis")
 
 st.caption(
-    "This chart shows how many song records fall within each duration range."
+    "This histogram shows how many song records fall "
+    "within different song-duration ranges."
 )
 
 duration = filtered.dropna(subset=["duration_minutes"])
@@ -549,20 +550,19 @@ if not duration.empty:
 
     fig = px.histogram(
         duration,
-        y="duration_minutes",
+        x="duration_minutes",
         nbins=20,
-        orientation="h",
         title="Distribution of Song Durations",
         labels={
-            "duration_minutes": "Song Duration (minutes)",
+            "duration_minutes": "Song Duration (Minutes)",
             "count": "Number of Song Records"
         },
         color_discrete_sequence=["#B58AE8"]
     )
 
     fig.update_layout(
-        xaxis_title="Count (Number of Song Records)",
-        yaxis_title="Song Duration (Minutes)",
+        xaxis_title="Song Duration (Minutes)",
+        yaxis_title="Count (Number of Song Records)",
         bargap=0.08
     )
 
