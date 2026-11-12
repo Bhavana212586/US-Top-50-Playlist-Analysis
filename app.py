@@ -434,20 +434,74 @@ if not artist_popularity.empty:
 else:
     st.info("Popularity data unavailable for the selected filters.")
 
+
 # --------------------------------------------------
-# POPULARITY VS RANK
+# ARTIST POPULARITY COMPARISON - BAR CHART
 # --------------------------------------------------
-st.header("⭐ Popularity vs Chart Rank")
-st.caption("Each dot represents a song record. The chart compares its popularity score with its chart position. Hover over a dot to see the song and date.")
-pop = filtered.dropna(subset=["popularity"])
-if not pop.empty:
-    fig = px.scatter(pop, x="position", y="popularity", color="artist", hover_data=["song", "date"],
-                     title="Popularity Compared with Chart Position",
-                     labels={"position": "Chart Position (1 = highest)", "popularity": "Popularity"})
-    fig.update_xaxes(autorange="reversed")
-    st.plotly_chart(chart_style(fig), use_container_width=True)
+st.header("⭐ Artist Popularity Comparison")
+
+st.caption(
+    "Compare the average popularity scores of selected artists. "
+    "Higher values indicate higher average popularity."
+)
+
+popularity_data = (
+    filtered.dropna(subset=["popularity"])
+    .groupby("artist", as_index=False)
+    .agg(
+        Average_Popularity=("popularity", "mean"),
+        Total_Records=("popularity", "count"),
+        Unique_Songs=("song", "nunique")
+    )
+    .sort_values("Average_Popularity", ascending=True)
+)
+
+if not popularity_data.empty:
+
+    fig = px.bar(
+        popularity_data,
+        x="Average_Popularity",
+        y="artist",
+        orientation="h",
+        color="artist",
+        text=popularity_data["Average_Popularity"].round(1),
+        hover_data=["Total_Records", "Unique_Songs"],
+        title="Average Song Popularity by Artist",
+        labels={
+            "artist": "Artist",
+            "Average_Popularity": "Average Popularity",
+            "Total_Records": "Total Records",
+            "Unique_Songs": "Unique Songs"
+        },
+        color_discrete_sequence=[
+            "#B58AE8", "#FF6384", "#36CFC9",
+            "#FFC857", "#5DA9E9", "#A8D672"
+        ]
+    )
+
+    fig.update_traces(
+        textposition="outside",
+        cliponaxis=False
+    )
+
+    fig.update_layout(
+        showlegend=False,
+        xaxis_title="Average Popularity Score",
+        yaxis_title="Artist",
+        xaxis=dict(
+            range=[0, 100],
+            gridcolor="#493064"
+        )
+    )
+
+    st.plotly_chart(
+        chart_style(fig, 420),
+        use_container_width=True
+    )
+
 else:
-    st.info("Popularity data unavailable.")
+    st.info("Popularity data is unavailable.")
+
 
 # --------------------------------------------------
 # EXPLICIT CONTENT
