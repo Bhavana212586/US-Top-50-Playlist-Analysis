@@ -80,13 +80,58 @@ COLORS = ["#B58AE8", "#895BC1", "#D0B4F5", "#65418A", "#E2C8FF"]
 
 
 def chart_style(fig, height=420):
+    """Apply one clear, consistent style to every Plotly chart."""
     fig.update_layout(
-        template="plotly_dark", paper_bgcolor="#171020", plot_bgcolor="#241536",
-        font=dict(color="#FFFFFF"), colorway=COLORS, height=height,
-        margin=dict(l=35, r=25, t=65, b=45), legend_title_text=""
+        template="plotly_dark",
+        paper_bgcolor="#171020",
+        plot_bgcolor="#241536",
+        font=dict(family="Arial, sans-serif", size=13, color="#FFFFFF"),
+        colorway=COLORS,
+        height=height,
+        margin=dict(l=45, r=35, t=75, b=55),
+        title=dict(
+            x=0.02, xanchor="left",
+            font=dict(size=19, color="#E2C8FF")
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom", y=1.02,
+            xanchor="right", x=1,
+            bgcolor="rgba(0,0,0,0)"
+        ),
+        hoverlabel=dict(
+            bgcolor="#493064",
+            bordercolor="#B58AE8",
+            font=dict(color="#FFFFFF", size=13)
+        ),
+        hovermode="closest"
     )
-    fig.update_xaxes(showgrid=False, automargin=True)
-    fig.update_yaxes(gridcolor="#493064", automargin=True)
+    fig.update_xaxes(
+        showgrid=False,
+        zeroline=False,
+        automargin=True,
+        title_font=dict(size=13, color="#E2C8FF"),
+        tickfont=dict(size=11, color="#FFFFFF")
+    )
+    # Make line charts and markers easier to see without changing chart data.
+    fig.update_traces(
+        selector=dict(type="scatter", mode="lines+markers"),
+        line=dict(width=3, color="#B58AE8"),
+        marker=dict(size=7, color="#E2C8FF", line=dict(width=1, color="#FFFFFF"))
+    )
+    fig.update_traces(
+        selector=dict(type="scatter", mode="markers"),
+        marker=dict(size=9, opacity=0.78)
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="#493064",
+        gridwidth=1,
+        zeroline=False,
+        automargin=True,
+        title_font=dict(size=13, color="#E2C8FF"),
+        tickfont=dict(size=11, color="#FFFFFF")
+    )
     return fig
 
 
@@ -249,6 +294,7 @@ st.plotly_chart(chart_style(fig, 460), use_container_width=True)
 # INDIVIDUAL SONG RANKING MOVEMENT
 # --------------------------------------------------
 st.header("🔄 Song Ranking Changes Over Time")
+st.caption("Choose one song to see how its chart position changed across the selected dates. A lower position number means a better rank.")
 song_options = filtered[["song", "artist"]].drop_duplicates().sort_values(["song", "artist"])
 song_options["label"] = song_options["song"] + " — " + song_options["artist"]
 selected_song_label = st.selectbox("Choose a song to track", song_options["label"].tolist(), key="ranking_song")
@@ -275,6 +321,7 @@ if not song_trend.empty:
 # TOP ARTISTS
 # --------------------------------------------------
 st.header("🎵 Top 10 Artists by Playlist Appearances")
+st.caption("This bar chart ranks the 10 artists with the most chart entries in the filtered data. Longer bars mean more appearances.")
 top_artists = filtered["artist"].value_counts().head(10).rename_axis("Artist").reset_index(name="Appearances")
 fig = px.bar(top_artists.sort_values("Appearances"), x="Appearances", y="Artist", orientation="h",
              text="Appearances", color="Artist", title="Artists with the Most Playlist Records",
@@ -286,6 +333,7 @@ st.plotly_chart(chart_style(fig, 470), use_container_width=True)
 # LONGEST CHART PRESENCE
 # --------------------------------------------------
 st.header("🏆 Songs with the Longest Chart Presence")
+st.caption("This chart shows the 10 songs that appeared on the chart on the greatest number of distinct days. Longer bars mean more chart days.")
 longest_songs = filtered.groupby(["song", "artist"], as_index=False).agg(
     **{"Chart Days": ("date", "nunique"), "Best Position": ("position", "min"), "Average Position": ("position", "mean")}
 ).sort_values(["Chart Days", "Best Position"], ascending=[False, True]).head(10)
@@ -299,6 +347,7 @@ st.dataframe(longest_songs, use_container_width=True, hide_index=True)
 # ARTIST-WISE POPULARITY COMPARISON
 # --------------------------------------------------
 st.header("⭐ Artist-wise Popularity Comparison")
+st.caption("Compare the average popularity score of artists. Higher bars indicate a higher average popularity score.")
 artist_popularity = filtered.dropna(subset=["popularity"]).groupby("artist", as_index=False).agg(
     **{"Average Popularity": ("popularity", "mean"), "Songs/Records": ("song", "count"), "Unique Songs": ("song", "nunique")}
 ).sort_values("Average Popularity", ascending=False).head(15)
@@ -316,6 +365,7 @@ else:
 # POPULARITY VS RANK
 # --------------------------------------------------
 st.header("⭐ Popularity vs Chart Rank")
+st.caption("Each dot represents a song record. The chart compares its popularity score with its chart position. Hover over a dot to see the song and date.")
 pop = filtered.dropna(subset=["popularity"])
 if not pop.empty:
     fig = px.scatter(pop, x="position", y="popularity", color="artist", hover_data=["song", "date"],
@@ -330,6 +380,7 @@ else:
 # EXPLICIT CONTENT
 # --------------------------------------------------
 st.header("🔞 Explicit Content Analysis")
+st.caption("This chart compares the number of explicit, non-explicit and unknown song records.")
 explicit_map = {True: "Explicit", False: "Non-Explicit", "true": "Explicit", "false": "Non-Explicit", "1": "Explicit", "0": "Non-Explicit", "yes": "Explicit", "no": "Non-Explicit"}
 explicit_values = filtered["is_explicit"].map(lambda x: explicit_map.get(x, explicit_map.get(str(x).strip().lower(), "Unknown")))
 explicit_counts = explicit_values.value_counts().reset_index()
@@ -345,6 +396,7 @@ else:
 # ALBUM TYPE
 # --------------------------------------------------
 st.header("💿 Album Type Analysis")
+st.caption("This chart shows how many records belong to each album type, such as album, single or compilation (depending on the dataset).")
 album = filtered.dropna(subset=["album_type"])
 if not album.empty:
     counts = album["album_type"].astype(str).value_counts().rename_axis("Album Type").reset_index(name="Count")
@@ -358,6 +410,7 @@ else:
 # SONG DURATION
 # --------------------------------------------------
 st.header("⏱️ Song Duration Analysis")
+st.caption("This histogram groups songs by their duration. Taller bars mean more song records fall within that duration range.")
 duration = filtered.dropna(subset=["duration_minutes"])
 if not duration.empty:
     fig = px.histogram(duration, x="duration_minutes", nbins=25, title="Distribution of Song Durations",
