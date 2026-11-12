@@ -279,17 +279,18 @@ else:
     st.info("Select an artist from the sidebar to view their songs.")
 
 
+
 # --------------------------------------------------
-# MONTHLY CHART RANKING TRENDS - ARTIST-WISE
+# MONTHLY CHART RANKING TRENDS - GROUPED BAR CHART
 # --------------------------------------------------
 st.header("📊 Monthly Chart Ranking Trends")
 
 st.caption(
-    "Compare the monthly average chart position of each selected artist separately. "
-    "Lower values indicate better chart rankings."
+    "Compare the average chart position of multiple artists "
+    "month by month. Each artist has a separate bar."
 )
 
-# Group records by month and artist
+# Calculate monthly average position for each artist
 monthly_artist = (
     filtered.groupby([
         pd.Grouper(key="date", freq="MS"),
@@ -306,6 +307,12 @@ if not monthly_artist.empty:
 
     monthly_artist["Month"] = monthly_artist["date"].dt.strftime("%b %Y")
 
+    artist_colors = [
+        "#B58AE8", "#FF6384", "#36CFC9",
+        "#FFC857", "#5DA9E9", "#A8D672",
+        "#FF9966", "#C792EA"
+    ]
+
     fig = px.bar(
         monthly_artist,
         x="Month",
@@ -313,24 +320,20 @@ if not monthly_artist.empty:
         color="artist",
         barmode="group",
         text=monthly_artist["Average_Position"].round(1),
-        hover_data={
-            "artist": True,
-            "Month": True,
-            "Average_Position": ":.2f",
-            "Total_Records": True,
-            "date": False
-        },
-        title="Monthly Average Chart Position by Artist",
+        hover_data=["Total_Records"],
+        title="Artist-wise Monthly Average Chart Position",
         labels={
             "Month": "Month",
             "Average_Position": "Average Chart Position",
             "artist": "Artist",
             "Total_Records": "Total Song Records"
         },
-        color_discrete_sequence=[
-            "#B58AE8", "#FF6B9D", "#65C3BA",
-            "#F5B85C", "#8AB4F8"
-        ]
+        color_discrete_sequence=artist_colors,
+        category_orders={
+            "Month": monthly_artist["Month"].drop_duplicates().tolist(),
+            "artist": selected_artists if selected_artists else
+                      sorted(monthly_artist["artist"].unique())
+        }
     )
 
     fig.update_traces(
@@ -339,12 +342,16 @@ if not monthly_artist.empty:
     )
 
     fig.update_layout(
+        barmode="group",
+        bargap=0.25,
+        bargroupgap=0.12,
         xaxis_title="Month",
         yaxis_title="Average Chart Position",
-        yaxis=dict(rangemode="tozero"),
-        legend_title="Selected Artists",
-        bargap=0.25,
-        bargroupgap=0.12
+        yaxis=dict(
+            rangemode="tozero",
+            gridcolor="#493064"
+        ),
+        legend_title="Selected Artists"
     )
 
     st.plotly_chart(
@@ -353,8 +360,7 @@ if not monthly_artist.empty:
     )
 
 else:
-    st.info("No chart records available for the selected filters.")
-
+    st.info("No chart records available.")
 
 
 # --------------------------------------------------
