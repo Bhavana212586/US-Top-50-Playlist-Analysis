@@ -281,14 +281,82 @@ else:
 # --------------------------------------------------
 # CHART RANKING TRENDS - DAILY MEAN
 # --------------------------------------------------
-st.header("📈 Chart Ranking Trends")
-st.caption("Lower position numbers mean a better chart rank. The line shows the daily average position of records matching your filters.")
-trend = filtered.groupby("date", as_index=False)["position"].mean().sort_values("date")
-fig = px.line(trend, x="date", y="position", markers=True, title="Average Chart Position by Date",
-              labels={"date": "Chart Date", "position": "Average Chart Position"})
-fig.update_yaxes(autorange="reversed", dtick=30)
-fig.update_xaxes(tickformat="%b %Y", tickangle=-35, nticks=10, rangeslider_visible=True)
-st.plotly_chart(chart_style(fig, 460), use_container_width=True)
+
+# --------------------------------------------------
+# CHART RANKING TRENDS - MONTHLY BAR CHART
+# --------------------------------------------------
+st.header("📊 Monthly Chart Ranking Trends")
+
+st.caption(
+    "This chart shows the average chart position of songs for each month. "
+    "Lower average positions indicate better chart performance."
+)
+
+# Calculate monthly average chart position
+monthly_trend = (
+    filtered.groupby(pd.Grouper(key="date", freq="MS"))
+    .agg(
+        Average_Position=("position", "mean"),
+        Total_Records=("position", "count")
+    )
+    .reset_index()
+)
+
+# Remove months without records
+monthly_trend = monthly_trend.dropna(subset=["Average_Position"])
+
+if not monthly_trend.empty:
+
+    monthly_trend["Month"] = monthly_trend["date"].dt.strftime("%b %Y")
+
+    fig = px.bar(
+        monthly_trend,
+        x="Month",
+        y="Average_Position",
+        text=monthly_trend["Average_Position"].round(1),
+        hover_data={
+            "Month": True,
+            "Average_Position": ":.2f",
+            "Total_Records": True,
+            "date": False
+        },
+        title="Average Chart Position by Month",
+        labels={
+            "Month": "Month",
+            "Average_Position": "Average Chart Position",
+            "Total_Records": "Total Records"
+        },
+        color_discrete_sequence=["#B58AE8"]
+    )
+
+    fig.update_traces(
+        textposition="outside",
+        marker_line_color="#D0B4F5",
+        marker_line_width=1,
+        cliponaxis=False
+    )
+
+    fig.update_layout(
+        yaxis=dict(
+            title="Average Chart Position",
+            rangemode="tozero",
+            gridcolor="#493064"
+        ),
+        xaxis=dict(
+            title="Month",
+            tickangle=-30
+        ),
+        showlegend=False
+    )
+
+    st.plotly_chart(
+        chart_style(fig, 450),
+        use_container_width=True
+    )
+
+else:
+    st.info("No chart ranking data available.")
+
 
 # --------------------------------------------------
 # INDIVIDUAL SONG RANKING MOVEMENT
