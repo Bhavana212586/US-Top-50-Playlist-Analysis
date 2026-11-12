@@ -533,19 +533,47 @@ if not album.empty:
 else:
     st.info("Album type data unavailable.")
 
+
 # --------------------------------------------------
-# SONG DURATION
+# SONG DURATION ANALYSIS - HORIZONTAL HISTOGRAM
 # --------------------------------------------------
 st.header("⏱️ Song Duration Analysis")
-st.caption("This histogram groups songs by their duration. Taller bars mean more song records fall within that duration range.")
+
+st.caption(
+    "This chart shows how many song records fall within each duration range."
+)
+
 duration = filtered.dropna(subset=["duration_minutes"])
+
 if not duration.empty:
-    fig = px.histogram(duration, x="duration_minutes", nbins=25, title="Distribution of Song Durations",
-                       labels={"duration_minutes": "Duration (minutes)", "count": "Number of Records"},
-                       color_discrete_sequence=["#B58AE8"])
-    st.plotly_chart(chart_style(fig), use_container_width=True)
+
+    fig = px.histogram(
+        duration,
+        y="duration_minutes",
+        nbins=20,
+        orientation="h",
+        title="Distribution of Song Durations",
+        labels={
+            "duration_minutes": "Song Duration (minutes)",
+            "count": "Number of Song Records"
+        },
+        color_discrete_sequence=["#B58AE8"]
+    )
+
+    fig.update_layout(
+        xaxis_title="Count (Number of Song Records)",
+        yaxis_title="Song Duration (Minutes)",
+        bargap=0.08
+    )
+
+    st.plotly_chart(
+        chart_style(fig, 450),
+        use_container_width=True
+    )
+
 else:
     st.info("Song duration data unavailable.")
+
 
 # --------------------------------------------------
 # DATA QUALITY CHECK
